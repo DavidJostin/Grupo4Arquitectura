@@ -1,0 +1,8 @@
+{# Lista de errores de validación. Se incluye en cada formulario. #}
+{% if errores %}
+  <div class="error" id="error">
+    {% for error in errores %}
+      <p>{{ error }}</p>
+    {% endfor %}
+  </div>
+{% endif %}

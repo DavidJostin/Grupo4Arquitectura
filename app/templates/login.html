@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block titulo %}Iniciar sesión{% endblock %}
+
+{% block contenido %}
+  <h1>Iniciar sesión</h1>
+  <p class="sub">Entra para calcular y ver tu historial.</p>
+
+  <form method="post">
+    <label for="usuario">Usuario</label>
+    <input id="usuario" name="usuario" value="{{ request.form.usuario }}" required>
+
+    <label for="clave">Contraseña</label>
+    <input id="clave" name="clave" type="password" required>
+
+    <button type="submit">Entrar</button>
+  </form>
+
+  {% include "_errores.html" %}
+
+  <p class="nota">¿No tienes cuenta? <a href="{{ url_for('auth.registro') }}">Regístrate</a></p>
+{% endblock %}
