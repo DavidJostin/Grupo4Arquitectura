@@ -4,28 +4,43 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block titulo %}Calculadora de pasajes{% endblock %} · Quito</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <nav class="menu">
-    {% if current_user.is_authenticated %}
-      <a href="{{ url_for('calculadora.inicio') }}">Calculadora</a>
-      <a href="{{ url_for('calculadora.historial') }}">Historial</a>
-      <span class="usuario">{{ current_user.nombre }}</span>
-      <a href="{{ url_for('auth.logout') }}">Cerrar sesión</a>
-    {% else %}
-      <a href="{{ url_for('auth.login') }}">Iniciar sesión</a>
-      <a href="{{ url_for('auth.registro') }}">Registrarse</a>
-    {% endif %}
-  </nav>
+  <header class="barra">
+    <a class="marca" href="{{ url_for('calculadora.inicio') }}">
+      <img src="{{ url_for('static', filename='favicon.svg') }}" alt="" width="28" height="28">
+      Pasajes UIO
+    </a>
+
+    {# request.endpoint dice en qué página estamos, para resaltar el enlace #}
+    <nav class="menu">
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('calculadora.inicio') }}"
+           class="{{ 'activo' if request.endpoint == 'calculadora.inicio' }}">Calculadora</a>
+        <a href="{{ url_for('calculadora.historial') }}"
+           class="{{ 'activo' if request.endpoint == 'calculadora.historial' }}">Historial</a>
+        <span class="usuario">{{ current_user.nombre }}</span>
+        <a href="{{ url_for('auth.logout') }}">Cerrar sesión</a>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}"
+           class="{{ 'activo' if request.endpoint == 'auth.login' }}">Iniciar sesión</a>
+        <a href="{{ url_for('auth.registro') }}"
+           class="{{ 'activo' if request.endpoint == 'auth.registro' }}">Registrarse</a>
+      {% endif %}
+    </nav>
+  </header>
 
   <main class="tarjeta {% block clase_tarjeta %}{% endblock %}">
-    {# Mensajes cortos que vienen de flash(), por ejemplo "Cuenta creada" #}
-    {% for mensaje in get_flashed_messages() %}
-      <p class="aviso">{{ mensaje }}</p>
+    {# Mensajes de flash(): la categoría ("exito" o "info") define el color #}
+    {% for categoria, mensaje in get_flashed_messages(with_categories=true) %}
+      <p class="aviso aviso-{{ categoria }}" role="status">{{ mensaje }}</p>
     {% endfor %}
 
     {% block contenido %}{% endblock %}
   </main>
+
+  <footer class="pie">Grupo 4 · Calculadora de pasajes de bus en Quito</footer>
 </body>
 </html>

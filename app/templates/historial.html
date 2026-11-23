@@ -8,6 +8,17 @@
   <p class="sub">Tus cálculos guardados, del más reciente al más antiguo.</p>
 
   {% if calculos %}
+    <div class="resumen" id="resumen">
+      <div class="dato">
+        <span>Cálculos</span>
+        <strong id="numero-calculos">{{ calculos|length }}</strong>
+      </div>
+      <div class="dato">
+        <span>Total acumulado</span>
+        <strong id="total-acumulado">{{ acumulado }}</strong>
+      </div>
+    </div>
+
     <table id="historial">
       <thead>
         <tr>
@@ -15,20 +26,34 @@
           <th>Viajes por día</th>
           <th>Días</th>
           <th>Total</th>
+          <th><span class="oculto">Acciones</span></th>
         </tr>
       </thead>
       <tbody>
         {% for calculo in calculos %}
+          {# data-label: en el celular cada fila se muestra como tarjeta #}
           <tr>
-            <td>{{ calculo.fecha.strftime('%d/%m/%Y') }}</td>
-            <td>{{ calculo.viajes }}</td>
-            <td>{{ calculo.dias }}</td>
-            <td>{{ calculo.total }}</td>
+            <td data-label="Fecha">{{ calculo.fecha.strftime('%d/%m/%Y') }}</td>
+            <td data-label="Viajes por día">{{ calculo.viajes }}</td>
+            <td data-label="Días">{{ calculo.dias }}</td>
+            <td data-label="Total" class="monto">{{ calculo.total }}</td>
+            <td class="acciones">
+              {# Borrar cambia datos, por eso es POST y no un enlace.
+                 confirm() es el único JavaScript: pide confirmación. #}
+              <form method="post"
+                    action="{{ url_for('calculadora.eliminar', calculo_id=calculo.id) }}"
+                    onsubmit="return confirm('¿Eliminar este cálculo?');">
+                <button type="submit" class="boton-peligro">Eliminar</button>
+              </form>
+            </td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
   {% else %}
-    <p class="nota" id="sin-calculos">Todavía no tienes cálculos guardados.</p>
+    <div class="vacio" id="sin-calculos">
+      <p>Todavía no tienes cálculos guardados.</p>
+      <a class="boton-enlace" href="{{ url_for('calculadora.inicio') }}">Hacer un cálculo</a>
+    </div>
   {% endif %}
 {% endblock %}

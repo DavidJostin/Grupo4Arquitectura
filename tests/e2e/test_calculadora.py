@@ -7,6 +7,8 @@ El fixture `page` lo da pytest-playwright (un navegador limpio por prueba);
 Cada prueba usa un usuario distinto para no depender de las demás.
 """
 
+from datetime import date
+
 from playwright.sync_api import Page, expect
 
 CLAVE = "secreta123"
@@ -37,9 +39,9 @@ def calcular(page: Page):
 def test_estudiante_se_registra(page: Page, url_base: str):
     registrar(page, url_base, "ana")
 
-    # Después de registrarse lo manda al login con un aviso.
+    # Después de registrarse lo manda al login con un aviso de éxito.
     expect(page).to_have_url(f"{url_base}/login")
-    expect(page.locator(".aviso")).to_have_text("Cuenta creada. Ahora inicia sesión.")
+    expect(page.locator(".aviso-exito")).to_have_text("Cuenta creada. Ahora inicia sesión.")
 
 
 def test_estudiante_inicia_sesion(page: Page, url_base: str):
@@ -50,6 +52,9 @@ def test_estudiante_inicia_sesion(page: Page, url_base: str):
     expect(page.locator("h1")).to_have_text("Calculadora de pasajes")
     expect(page.get_by_role("link", name="Cerrar sesión")).to_be_visible()
 
+    # La fecha viene con la fecha de hoy por defecto.
+    expect(page.locator("#fecha")).to_have_value(date.today().isoformat())
+
 
 def test_estudiante_calcula_su_gasto_mensual(page: Page, url_base: str):
     registrar(page, url_base, "maria")
@@ -59,8 +64,18 @@ def test_estudiante_calcula_su_gasto_mensual(page: Page, url_base: str):
     # Con el ERROR INTENCIONAL 3 esta prueba queda en ROJO.
     expect(page.locator("#total")).to_have_text("$14.00")
 
+    # Detalle: 2 x 20 = 40 pasajes a $0.35.
+    expect(page.locator("#detalle")).to_contain_text("40")
+    expect(page.locator("#detalle")).to_contain_text("$0.35")
+    # Comparación: con la tarifa de 2027 serían $2.00 más.
+    expect(page.locator("#comparacion")).to_contain_text("$2.00 más")
 
-def test_el_calculo_aparece_en_el_historial(page: Page, url_base: str):
+    # El formulario conserva lo que escribió.
+    expect(page.locator("#viajes")).to_have_value("2")
+    expect(page.locator("#dias")).to_have_value("20")
+
+
+def test_el_calculo_aparece_en_el_historial_y_se_puede_eliminar(page: Page, url_base: str):
     registrar(page, url_base, "pedro")
     iniciar_sesion(page, url_base, "pedro")
     calcular(page)
@@ -72,3 +87,14 @@ def test_el_calculo_aparece_en_el_historial(page: Page, url_base: str):
     fila = page.locator("#historial tbody tr").first
     expect(fila).to_contain_text("18/11/2026")
     expect(fila).to_contain_text("$14.00")
+
+    # Resumen de arriba: 1 cálculo y $14.00 acumulado.
+    expect(page.locator("#numero-calculos")).to_have_text("1")
+    expect(page.locator("#total-acumulado")).to_have_text("$14.00")
+
+    # Eliminar: el navegador pregunta "¿Eliminar este cálculo?" y aceptamos.
+    page.once("dialog", lambda dialogo: dialogo.accept())
+    fila.get_by_role("button", name="Eliminar").click()
+
+    expect(page.locator(".aviso-exito")).to_have_text("Cálculo eliminado.")
+    expect(page.locator("#sin-calculos")).to_be_visible()

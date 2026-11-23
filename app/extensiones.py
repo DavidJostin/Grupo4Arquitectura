@@ -12,3 +12,4 @@ db = SQLAlchemy()
 login_manager = LoginManager()
 login_manager.login_view = "auth.login"  # a dónde mandar si no hay sesión
 login_manager.login_message = "Inicia sesión para usar la calculadora."
+login_manager.login_message_category = "info"

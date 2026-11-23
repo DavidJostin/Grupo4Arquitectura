@@ -15,6 +15,32 @@ sobre este mismo código.
 - **Historial**: cada usuario ve solo sus cálculos (fecha, viajes, días, total).
 - **Validación**: viajes y días deben ser enteros no negativos y los días van
   de 0 a 31. Los errores se muestran en la página.
+- **Detalle del cálculo**: pasajes del mes (viajes x días), tarifa aplicada y total.
+- **Comparación 2026 vs 2027**: cuánto más gastaría con la tarifa nueva ($0.40)
+  con los mismos viajes y días.
+- **Resumen del historial**: número de cálculos y total acumulado, y un botón
+  para eliminar cada cálculo (formulario POST con confirmación).
+
+### Interfaz
+
+- Estilo oscuro y azul con colores en variables CSS (`:root` en `style.css`).
+- Responsive: en el celular el menú se centra, el formulario va en una columna
+  y la tabla del historial se ve como tarjetas.
+- El formulario conserva lo escrito y la fecha viene con la de hoy.
+- Ícono de pestaña (`static/favicon.svg`).
+- Avisos de color: verde para éxito, azul para información y rojo para errores.
+- El único JavaScript es el `confirm()` antes de eliminar un cálculo.
+
+### Rutas
+
+| Ruta | Método | Qué hace |
+|------|--------|----------|
+| `/registro` | GET, POST | Crear cuenta |
+| `/login` | GET, POST | Iniciar sesión |
+| `/logout` | GET | Cerrar sesión |
+| `/` | GET, POST | Calculadora (pide sesión) |
+| `/historial` | GET | Historial con resumen (pide sesión) |
+| `/historial/<id>/eliminar` | POST | Borra un cálculo propio (pide sesión) |
 
 ## Los 3 errores intencionales
 
@@ -37,12 +63,13 @@ calculadora-pasajes/
 │   ├── config.py          # configuración (error 1)
 │   ├── extensiones.py     # db (SQLAlchemy) y login_manager (Flask-Login)
 │   ├── modelos.py         # tablas Usuario y Calculo
-│   ├── tarifas.py         # lógica de negocio, sin Flask (error 2)
+│   ├── tarifas.py         # lógica de negocio, sin Flask (error 2): tarifa, gasto,
+│   │                      #   pasajes del mes, comparación 2026 vs 2027
 │   ├── validacion.py      # validación de formularios, sin Flask
 │   ├── auth.py            # blueprint "auth": registro, login, logout
-│   ├── rutas.py           # blueprint "calculadora": cálculo e historial (error 3)
+│   ├── rutas.py           # blueprint "calculadora": cálculo, historial y eliminar (error 3)
 │   ├── templates/         # base.html + páginas que la extienden
-│   └── static/style.css
+│   └── static/            # style.css y favicon.svg
 ├── tests/
 │   ├── conftest.py        # levanta la app con una base de datos temporal
 │   ├── unitarias/         # PERSONA 1 · pytest
@@ -88,9 +115,11 @@ Con los errores intencionales, `pytest` muestra **3 pruebas en rojo**:
 |--------|---------|---------------|
 | `test_tarifa_desde_el_1_de_enero_de_2027_es_40_centavos` | `tests/unitarias/test_tarifas.py` | error 2 |
 | `test_estudiante_calcula_su_gasto_mensual` | `tests/e2e/test_calculadora.py` | error 3 |
-| `test_el_calculo_aparece_en_el_historial` | `tests/e2e/test_calculadora.py` | error 3 (el cálculo nunca se guarda) |
+| `test_el_calculo_aparece_en_el_historial_y_se_puede_eliminar` | `tests/e2e/test_calculadora.py` | error 3 (el cálculo nunca se guarda) |
 
-Al corregir los errores 2 y 3, todo queda en verde. El error 1 no lo detecta
+Al corregir los errores 2 y 3, todo queda en verde (20 pruebas).
+Con el error 3 se ve la página "Internal Server Error" de Flask: a propósito
+no hay una página de error personalizada, para que en la demo se vea el 500. El error 1 no lo detecta
 pytest: lo marca SonarQube como *Security Hotspot*.
 
 ## Comandos útiles

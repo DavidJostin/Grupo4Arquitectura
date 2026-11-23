@@ -9,7 +9,14 @@ from decimal import Decimal
 
 import pytest
 
-from app.tarifas import formato_dinero, gasto_mensual, tarifa
+from app.tarifas import (
+    comparar_tarifas,
+    formato_dinero,
+    gasto_mensual,
+    leer_dinero,
+    pasajes_del_mes,
+    tarifa,
+)
 
 
 def test_tarifa_en_2026_es_35_centavos():
@@ -33,3 +40,21 @@ def test_formato_dinero_muestra_dos_decimales():
 def test_no_acepta_valores_negativos():
     with pytest.raises(ValueError):
         gasto_mensual(-1, 20, date(2026, 11, 18))
+
+
+def test_pasajes_del_mes():
+    # 2 viajes x 20 días = 40 pasajes
+    assert pasajes_del_mes(2, 20) == 40
+
+
+def test_comparar_tarifas_2026_contra_2027():
+    # 40 pasajes: $14.00 con $0.35 y $16.00 con $0.40 -> $2.00 más
+    comparacion = comparar_tarifas(2, 20)
+    assert comparacion["con_2026"] == Decimal("14.00")
+    assert comparacion["con_2027"] == Decimal("16.00")
+    assert comparacion["diferencia"] == Decimal("2.00")
+
+
+def test_leer_dinero_es_lo_contrario_de_formato_dinero():
+    assert leer_dinero("$14.00") == Decimal("14.00")
+    assert leer_dinero(formato_dinero(Decimal("2.5"))) == Decimal("2.50")

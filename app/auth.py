@@ -28,7 +28,7 @@ def registro():
             usuario.poner_clave(clave)
             db.session.add(usuario)
             db.session.commit()
-            flash("Cuenta creada. Ahora inicia sesión.")
+            flash("Cuenta creada. Ahora inicia sesión.", "exito")
             return redirect(url_for("auth.login"))
 
     return render_template("registro.html", errores=errores)
@@ -60,5 +60,5 @@ def login():
 @login_required
 def logout():
     logout_user()
-    flash("Cerraste sesión.")
+    flash("Cerraste sesión.", "info")
     return redirect(url_for("auth.login"))

@@ -4,27 +4,49 @@
   <h1>Calculadora de pasajes</h1>
   <p class="sub">¿Cuánto gastas al mes en bus para ir a la UCE?</p>
 
-  {# novalidate: dejamos que valide el servidor para ver nuestros mensajes #}
-  <form method="post" novalidate>
-    <label for="viajes">Viajes por día</label>
-    <input id="viajes" name="viajes" type="number" min="0"
-           value="{{ request.form.viajes }}" required>
+  {% include "_errores.html" %}
 
-    <label for="dias">Días al mes</label>
-    <input id="dias" name="dias" type="number" min="0" max="31"
-           value="{{ request.form.dias }}" required>
+  {# novalidate: dejamos que valide el servidor para ver nuestros mensajes.
+     value="...": el formulario conserva lo que escribió el usuario. #}
+  <form method="post" novalidate>
+    <div class="fila">
+      <div class="campo">
+        <label for="viajes">Viajes por día</label>
+        <input id="viajes" name="viajes" type="number" min="0" inputmode="numeric"
+               placeholder="Ej. 2" value="{{ request.form.viajes }}" required>
+      </div>
+      <div class="campo">
+        <label for="dias">Días al mes</label>
+        <input id="dias" name="dias" type="number" min="0" max="31" inputmode="numeric"
+               placeholder="Ej. 20" value="{{ request.form.dias }}" required>
+      </div>
+    </div>
 
     <label for="fecha">Fecha</label>
+    {# Si no hay nada escrito, ponemos la fecha de hoy #}
     <input id="fecha" name="fecha" type="date"
-           value="{{ request.form.fecha }}" required>
+           value="{{ request.form.fecha or hoy }}" required>
 
     <button type="submit">Calcular</button>
   </form>
 
   {% if total %}
-    <p class="resultado">Gasto del mes: <strong id="total">{{ total }}</strong></p>
+    <section class="resultado">
+      <p class="resultado-titulo">Gasto del mes</p>
+      <strong id="total">{{ total }}</strong>
+
+      <dl class="detalle" id="detalle">
+        <div><dt>Pasajes del mes</dt><dd>{{ detalle.pasajes }}</dd></div>
+        <div><dt>Tarifa aplicada</dt><dd>{{ detalle.tarifa }}</dd></div>
+        <div><dt>Total</dt><dd>{{ total }}</dd></div>
+      </dl>
+
+      <div class="comparacion" id="comparacion">
+        <p>Con la tarifa de 2027 gastarías <strong>{{ detalle.diferencia }} más</strong> al mes que con la de 2026.</p>
+        <p class="nota-chica">2026 ($0.35): {{ detalle.con_2026 }} · 2027 ($0.40): {{ detalle.con_2027 }}</p>
+      </div>
+    </section>
   {% endif %}
-  {% include "_errores.html" %}
 
   <p class="nota">Tarifa: $0.35 hasta el 31/12/2026 · $0.40 desde el 01/01/2027</p>
 {% endblock %}

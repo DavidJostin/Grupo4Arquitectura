@@ -6,17 +6,18 @@
   <h1>Iniciar sesión</h1>
   <p class="sub">Entra para calcular y ver tu historial.</p>
 
+  {% include "_errores.html" %}
+
   <form method="post">
     <label for="usuario">Usuario</label>
-    <input id="usuario" name="usuario" value="{{ request.form.usuario }}" required>
+    <input id="usuario" name="usuario" autocomplete="username"
+           value="{{ request.form.usuario }}" required>
 
     <label for="clave">Contraseña</label>
-    <input id="clave" name="clave" type="password" required>
+    <input id="clave" name="clave" type="password" autocomplete="current-password" required>
 
     <button type="submit">Entrar</button>
   </form>
-
-  {% include "_errores.html" %}
 
   <p class="nota">¿No tienes cuenta? <a href="{{ url_for('auth.registro') }}">Regístrate</a></p>
 {% endblock %}

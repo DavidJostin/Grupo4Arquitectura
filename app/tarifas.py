@@ -26,13 +26,31 @@ def tarifa(fecha: date) -> Decimal:
     return TARIFA_ACTUAL
 
 
+def pasajes_del_mes(viajes_por_dia: int, dias: int) -> int:
+    """Cuántos pasajes paga en el mes: 2 viajes x 20 días = 40 pasajes."""
+    return viajes_por_dia * dias
+
+
 def gasto_mensual(viajes_por_dia: int, dias: int, fecha: date) -> Decimal:
-    """Gasto del mes: viajes por día x días x tarifa."""
+    """Gasto del mes: pasajes del mes x tarifa."""
     if viajes_por_dia < 0 or dias < 0:
         raise ValueError("Los viajes y los días no pueden ser negativos")
-    return viajes_por_dia * dias * tarifa(fecha)
+    return pasajes_del_mes(viajes_por_dia, dias) * tarifa(fecha)
+
+
+def comparar_tarifas(viajes_por_dia: int, dias: int) -> dict:
+    """Mismo mes con la tarifa de 2026 y con la de 2027, y la diferencia."""
+    pasajes = pasajes_del_mes(viajes_por_dia, dias)
+    con_2026 = pasajes * TARIFA_ACTUAL
+    con_2027 = pasajes * TARIFA_NUEVA
+    return {"con_2026": con_2026, "con_2027": con_2027, "diferencia": con_2027 - con_2026}
 
 
 def formato_dinero(valor: Decimal) -> str:
     """Convierte 14 en '$14.00'."""
     return f"${valor:.2f}"
+
+
+def leer_dinero(texto: str) -> Decimal:
+    """Lo contrario de formato_dinero: convierte '$14.00' en Decimal('14.00')."""
+    return Decimal(texto.replace("$", ""))
